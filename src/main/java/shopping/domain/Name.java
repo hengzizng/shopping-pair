@@ -6,4 +6,8 @@ public class Name {
     public Name(String name) {
         this.value = name;
     }
+
+    public String getValue() {
+        return value;
+    }
 }

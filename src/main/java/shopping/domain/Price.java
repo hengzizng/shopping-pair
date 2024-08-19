@@ -10,4 +10,8 @@ public class Price {
 
         this.value = i;
     }
+
+    public int getValue() {
+        return value;
+    }
 }

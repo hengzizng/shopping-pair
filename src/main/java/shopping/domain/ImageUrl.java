@@ -15,4 +15,8 @@ public class ImageUrl {
 
         this.value = s;
     }
+
+    public String getValue() {
+        return value;
+    }
 }
