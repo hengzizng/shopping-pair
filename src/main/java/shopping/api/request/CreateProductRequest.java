@@ -2,8 +2,11 @@ package shopping.api.request;
 
 import jakarta.validation.constraints.Pattern;
 import shopping.domain.entity.ImageUrl;
+import shopping.domain.entity.Name;
 
 public class CreateProductRequest {
+
+    @Pattern(regexp = Name.regex)
     private String name;
 
     private int price;

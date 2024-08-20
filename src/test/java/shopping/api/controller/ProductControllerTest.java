@@ -9,9 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import shopping.api.request.CreateProductRequest;
 import shopping.api.request.UpdateProductRequest;
@@ -19,8 +18,7 @@ import shopping.api.response.ProductInfoResponse;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductControllerTest {
@@ -36,6 +34,22 @@ public class ProductControllerTest {
         client = restTemplateBuilder
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
+    }
+
+
+    @Test
+    @DisplayName("상품 생성 시, 상품 이름은 유효성 조건을 만족해야한다.")
+    void create400Test() {
+        final String postUrl = "http://localhost:" + port + "/api/products";
+        final CreateProductRequest request = new CreateProductRequest(
+                "abcdefg@naver.com",
+                1000,
+                "https://www.naver.com/image.png"
+        );
+//        final ResponseEntity<String> actual = client.postForEntity(postUrl, request, String.class);
+
+        assertThatRuntimeException().isThrownBy(() -> client.postForEntity(postUrl, request, String.class))
+                .isInstanceOf(RestClientException.class);
     }
 
     @Test
