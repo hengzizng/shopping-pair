@@ -10,6 +10,10 @@ public class ImageUrl {
 
     private String value;
 
+    protected ImageUrl() {
+
+    }
+
     public ImageUrl(String s) throws IllegalArgumentException{
         if(!pattern.matcher(s).matches())
             throw new IllegalArgumentException();

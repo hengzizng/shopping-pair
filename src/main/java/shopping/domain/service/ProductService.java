@@ -1,6 +1,7 @@
 package shopping.domain.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import shopping.api.request.CreateProductRequest;
 import shopping.domain.entity.ImageUrl;
@@ -13,7 +14,6 @@ import java.util.List;
 
 @Service
 public class ProductService {
-
     @Autowired
     ProductRepository productRepository;
 

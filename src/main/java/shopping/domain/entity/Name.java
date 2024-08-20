@@ -5,6 +5,10 @@ import java.util.Objects;
 public class Name {
     private String value;
 
+    protected Name() {
+
+    }
+
     public Name(String name) {
         this.value = name;
     }
