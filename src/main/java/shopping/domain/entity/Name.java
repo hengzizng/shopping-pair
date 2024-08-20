@@ -4,7 +4,10 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Name {
-    public static final String regex = "^[가-힣一-龥a-zA-Z0-9\\s\\(\\)\\[\\]\\+\\-\\&\\/_]{1,15}$";
+//    public static final String regex = "^[가-힣一-龥a-zA-Z0-9\\s\\(\\)\\[\\]\\+\\-\\&\\/_]{1,15}$";
+
+    public static final String regex = "^[가-힣a-zA-Z0-9\\s\\(\\)\\[\\]\\+\\-\\&\\/_]{1,15}$";
+
 
     public static final Pattern pattern = Pattern.compile(regex);
     
@@ -24,6 +27,13 @@ public class Name {
             throw new IllegalArgumentException();
 
         this.value = s;
+    }
+
+    @Override
+    public String toString() {
+        return "Name{" +
+                "value='" + value + '\'' +
+                '}';
     }
 
     @Override

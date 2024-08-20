@@ -44,6 +44,12 @@ dependencies {
     testRuntimeOnly("com.mysql:mysql-connector-j")
 
     testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter:1.0.15")
+
+    testImplementation("io.cucumber:cucumber-java:7.18.1")
+    testImplementation("io.cucumber:cucumber-junit:7.18.1")
+    testImplementation("io.cucumber:cucumber-spring:7.18.1")
+    testImplementation("org.junit.platform:junit-platform-suite-api")
+
     implementation("com.github.curious-odd-man:rgxgen:2.0")
 
 }
