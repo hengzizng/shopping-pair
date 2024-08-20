@@ -1,5 +1,6 @@
 package shopping.api.controller;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 import shopping.api.request.CreateProductRequest;
+import shopping.api.request.UpdateProductRequest;
 import shopping.api.response.ProductInfoResponse;
 
 import java.util.List;
@@ -37,49 +39,107 @@ public class ProductControllerTest {
 
     @Test
     @DisplayName("상품 생성할 땐 Name, Price, ImageUrl가 필요하다.")
-    void test() {
-        // given
-        final String url = "http://localhost:" + port + "/api/products";
-        final CreateProductRequest request = new CreateProductRequest(
-                "name",
-                1000,
-                "https://www.naver.com/image.png"
-        );
-
-        // when
-        final ProductInfoResponse actual = client.postForEntity(url, request, ProductInfoResponse.class).getBody();
-
-        // then
-        assertThat(actual.getName()).isEqualTo("name");
-        assertThat(actual.getPrice()).isEqualTo(1000);
-        assertThat(actual.getImageUrl()).isEqualTo("https://www.naver.com/image.png");
+    void createTest() {
+        상품_생성("name", 1000, "https://www.naver.com/image.png");
     }
 
 
     @Test
     @DisplayName("상품 조회 테스트")
     void getTest() {
+        final ProductInfoResponse expected = 상품_생성("name", 1000, "https://www.naver.com/image.png");
 
-        final String postUrl = "http://localhost:" + port + "/api/products";
-        final CreateProductRequest request = new CreateProductRequest(
-                "name",
-                1000,
-                "https://www.naver.com/image.png"
-        );
-
-        // when
-        final ProductInfoResponse expected = client.postForEntity(postUrl, request, ProductInfoResponse.class).getBody();
-
-        // given
-        final String url = "http://localhost:" + port + "/api/products";
-
-        // when
-        final List<ProductInfoResponse> actual = client.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<ProductInfoResponse>>(){}).getBody();
-
-        // then
-        assertThat(actual.get(0).getName()).isEqualTo(expected.getName());
-        assertThat(actual.get(0).getPrice()).isEqualTo(expected.getPrice());
-        assertThat(actual.get(0).getImageUrl()).isEqualTo(expected.getImageUrl());
+        상품_조회(expected);
     }
 
+    @Test
+    @DisplayName("상품 수정 테스트")
+    void updateTest() {
+        // given
+        final ProductInfoResponse expected = 상품_생성("name", 1000, "https://www.naver.com/image.png");
+
+        상품_수정(expected, "수정", 1000, "https://www.naver.com/image.png");
+    }
+
+    private void 상품_수정(
+            ProductInfoResponse expected,
+            final String name,
+            final int price,
+            final String imageUrl
+    ) {
+        // when
+        final String url = "http://localhost:" + port + "/api/products/" + expected.getId();
+        final CreateProductRequest request = new CreateProductRequest(
+                name,
+                price,
+                imageUrl
+        );
+
+        final ProductInfoResponse actual = client.postForEntity(url, request, ProductInfoResponse.class).getBody();
+
+        // then
+        assertThat(actual.getId()).isEqualTo(expected.getId());
+        assertThat(actual.getName()).isEqualTo(name);
+        assertThat(actual.getPrice()).isEqualTo(price);
+        assertThat(actual.getImageUrl()).isEqualTo(imageUrl);
+    }
+
+    @Nullable
+    private ProductInfoResponse 상품_생성(
+            final String name,
+            final int price,
+            final String imageUrl
+    ) {
+        final String postUrl = "http://localhost:" + port + "/api/products";
+        final CreateProductRequest request = new CreateProductRequest(
+                name,
+                price,
+                imageUrl
+        );
+        final ProductInfoResponse actual = client.postForEntity(postUrl, request, ProductInfoResponse.class).getBody();
+
+        assertThat(actual.getId()).isNotNull();
+        assertThat(actual.getName()).isEqualTo(name);
+        assertThat(actual.getPrice()).isEqualTo(price);
+        assertThat(actual.getImageUrl()).isEqualTo(imageUrl);
+
+        return actual;
+    }
+
+    private ProductInfoResponse 상품_조회(ProductInfoResponse expected) {
+        // when
+        final String url = "http://localhost:" + port + "/api/products";
+        final ProductInfoResponse actual = client.exchange(
+                        url,
+                        HttpMethod.GET,
+                        null, new ParameterizedTypeReference<List<ProductInfoResponse>>() {
+                        }
+                ).getBody()
+                .stream()
+                .filter(response -> response.getId().equals(expected.getId()))
+                .findFirst()
+                .orElseThrow();
+
+        // then
+        assertThat(actual.getId()).isEqualTo(expected.getId());
+        assertThat(actual.getName()).isEqualTo(expected.getName());
+        assertThat(actual.getPrice()).isEqualTo(expected.getPrice());
+        assertThat(actual.getImageUrl()).isEqualTo(expected.getImageUrl());
+
+        return actual;
+    }
+
+    private List<ProductInfoResponse> 상품_조회() {
+        // when
+        final String url = "http://localhost:" + port + "/api/products";
+        final List<ProductInfoResponse> actual = client.exchange(
+                        url,
+                        HttpMethod.GET,
+                        null, new ParameterizedTypeReference<List<ProductInfoResponse>>() {
+                        }
+                ).getBody();
+
+        // then
+        return actual;
+    }
 }

@@ -14,6 +14,7 @@ import shopping.util.IdGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeMap;
 
 @RestController
@@ -27,9 +28,11 @@ public class ProductController {
             @Valid @RequestBody CreateProductRequest createProductRequest
     ) {
         Product product = new Product(new Name(createProductRequest.getName()), new Price(createProductRequest.getPrice()), new ImageUrl(createProductRequest.getImageUrl()));
-        dataBase.put(IdGenerator.getNextId(dataBase), product);
+        Long id = IdGenerator.getNextId(dataBase);
+        dataBase.put(id, product);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new ProductInfoResponse(
+                id,
                 product.getName().getValue(),
                 product.getPrice().getValue(),
                 product.getImageUrl().getValue()
@@ -39,27 +42,36 @@ public class ProductController {
 
     @GetMapping("")
     public ResponseEntity<List<ProductInfoResponse>> getProduct() {
-//        List<ProductInfoResponse> responses = new ArrayList<>();
-//
-//        for (Product value : dataBase.values()) {
-//            responses.add(
-//                    new ProductInfoResponse(
-//                            value.getName().getValue(),
-//                            value.getPrice().getValue(),
-//                            value.getImageUrl().getValue()
-//                    )
-//            );
-//        }
-        // return ResponseEntity.status(HttpStatus.OK).body(responses);
-
-        final List<ProductInfoResponse> streamResponses = dataBase.values()
+        final List<ProductInfoResponse> streamResponses = dataBase.entrySet()
                 .stream()
-                .map(value -> new ProductInfoResponse(
-                        value.getName().getValue(),
-                        value.getPrice().getValue(),
-                        value.getImageUrl().getValue()
+                .map(mapEntry -> new ProductInfoResponse(
+                        mapEntry.getKey(),
+                        mapEntry.getValue().getName().getValue(),
+                        mapEntry.getValue().getPrice().getValue(),
+                        mapEntry.getValue().getImageUrl().getValue()
                 )).toList();
 
         return ResponseEntity.status(HttpStatus.OK).body(streamResponses);
     }
+
+    @PostMapping("/{productId}")
+    public ResponseEntity<ProductInfoResponse> updateProduct(
+            @PathVariable long productId,
+            @Valid @RequestBody CreateProductRequest createProductRequest
+    ) {
+        if(Optional.ofNullable(dataBase.get(productId)).isEmpty()) {
+            throw new IllegalArgumentException("해당 상품은 없습니다.");
+        }
+
+        Product product = new Product(new Name(createProductRequest.getName()), new Price(createProductRequest.getPrice()), new ImageUrl(createProductRequest.getImageUrl()));
+        dataBase.put(productId, product);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ProductInfoResponse(
+                productId,
+                product.getName().getValue(),
+                product.getPrice().getValue(),
+                product.getImageUrl().getValue()
+        ));
+    }
+
 }
