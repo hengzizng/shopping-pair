@@ -12,27 +12,38 @@
 - [x] 상품 삭제할 땐 ID가 필요하다.
 - [x] 상품 조회할 때는 전체 상품을 보여준다.
 
+---
+- [ ] 상품을 일부 특수 문자는 허용하지 않는다.
+    * (할인) 아메리카노!
+    * 아메리카노 *할인
+    * ...
 
+```gherkin
+Given 상품 이름이 "(할인) 아메리카노!" 일 때
+When 상품을 생성하면
+Then 400 Bad Request를 응답한다
+And "올바르지 않은 상품 이름입니다."라고 응답한다.
+```
+```gherkin
+Given 기존 상품이 존재할 때
+  And 변경하고자 하는 상품 이름이 "아메리카노 *할인" 일 때
+When 상품을 수정하면
+Then 400 Bad Request를 응답한다
+And "올바르지 않은 상품 이름입니다."라고 응답한다.
+```
 
-
-public class Product {
-    private String name; // 15자 이하  
-    private Long price; // 가격은 음수일수 없고
-    
-    public Product(name, price) {
-        // 여기서 올바른 값인지 체크 
-        this.name = name;
-        this.price = price;
-    }
-}
-
-public class Product {
-    private Name name;
-}
-
-class Name {
-}
-
-class Price {
-    
-}
+---
+- [ ] 상품은 비속어를 포함하지 않는다.
+```gherkin
+Given 상품 이름이 "fuck 아메리카노" 일 때
+When 상품을 생성하면
+Then 400 Bad Request를 응답한다
+And "올바르지 않은 상품 이름입니다."라고 응답한다.
+```
+```gherkin
+Given 기존 상품이 존재할 때
+  And 변경하고자 하는 상품 이름이 "아메리카노 fuck" 일 때
+When 상품을 수정하면
+Then 400 Bad Request를 응답한다
+And "올바르지 않은 상품 이름입니다."라고 응답한다.
+```

@@ -8,8 +8,20 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            loggerLevel: FULL  # FULL, BASIC, HEADERS, NONE ? ?? ??
+          purgoMalumClient:
+            url: https://www.purgomalum.com/service
 
 logging:
   level:
+    root: INFO
+    org.springframework.cloud.openfeign: DEBUG
+    feign.client: DEBUG
+    feign.logger: DEBUG
     org.hibernate.SQL: DEBUG
+    shopping.domain.client.PurgoMalumClient: DEBUG

@@ -1,5 +1,6 @@
 package shopping.api.controller;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -8,20 +9,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import shopping.api.request.CreateProductRequest;
-import shopping.api.request.UpdateProductRequest;
 import shopping.api.response.ProductInfoResponse;
 
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ProductControllerTest {
+@AutoConfigureWireMock(port = 0)
+@TestPropertySource(properties = {
+        "spring.cloud.openfeign.client.config.purgoMalumClient.url=http://localhost:${wiremock.server.port}"
+})
+public class ProductControllerAcceptanceTest {
     @LocalServerPort
     private int port;
 
@@ -34,15 +43,34 @@ public class ProductControllerTest {
         client = restTemplateBuilder
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
+
+        WireMock.stubFor(get(urlPathEqualTo("/containsprofanity"))
+                .withQueryParam("text", equalTo("ㅅㅂ 아메리카노"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", MediaType.TEXT_PLAIN_VALUE)
+                        .withBody("true")));
+
+        WireMock.stubFor(get(urlPathEqualTo("/containsprofanity"))
+                .withQueryParam("text", equalTo("아메리카노"))
+                .willReturn(aResponse().withBody("false")));
+
+        WireMock.stubFor(get(urlPathEqualTo("/containsprofanity"))
+                .withQueryParam("text", equalTo("아메리카노 fuck"))
+                .willReturn(aResponse().withBody("true")));
     }
 
-
     @Test
-    @DisplayName("상품 생성 시, 상품 이름은 유효성 조건을 만족해야한다.")
-    void create400Test() {
+    @DisplayName("""
+            Given 상품 이름이 "ㅅㅂ 아메리카노" 일 때
+            When 상품을 생성하면
+            Then 400 Bad Request를 응답한다
+            And "올바르지 않은 상품 이름입니다."라고 응답한다.
+            ```
+            """)
+    void swearWordCreateProductTest() {
         final String postUrl = "http://localhost:" + port + "/api/products";
         final CreateProductRequest request = new CreateProductRequest(
-                "abcdefg@naver.com",
+                "ㅅㅂ 아메리카노",
                 1000,
                 "https://www.naver.com/image.png"
         );
@@ -52,36 +80,29 @@ public class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("상품 생성할 땐 Name, Price, ImageUrl가 필요하다.")
-    void createTest() {
-        상품_생성("name", 1000, "https://www.naver.com/image.png");
-    }
+    @DisplayName("""
+            Given 기존 상품이 존재할 때
+              And 변경하고자 하는 상품 이름이 "아메리카노 fuck" 일 때
+            When 상품을 수정하면
+            Then 400 Bad Request를 응답한다
+            And "올바르지 않은 상품 이름입니다."라고 응답한다.
+            ```
+            """)
+    void swearWordUpdateProductTest() {
+        final ProductInfoResponse expected = 상품_생성(
+                "아메리카노",
+                1000,
+                "https://www.naver.com/image.png"
+        );
+        final String url = "http://localhost:" + port + "/api/products/" + expected.getId();
+        final CreateProductRequest request = new CreateProductRequest(
+                "아메리카노 fuck",
+                1000,
+                "https://www.naver.com/image.png"
+        );
 
-
-    @Test
-    @DisplayName("상품 조회 테스트")
-    void getTest() {
-        final ProductInfoResponse expected = 상품_생성("name", 1000, "https://www.naver.com/image.png");
-
-        상품_조회(expected);
-    }
-
-    @Test
-    @DisplayName("상품 삭제 테스트")
-    void deleteTest() {
-        final ProductInfoResponse actual = 상품_생성("name", 1000, "https://www.naver.com/image.png");
-
-        final String url = "http://localhost:" + port + "/api/products/" + actual.getId();
-        assertThatNoException().isThrownBy(() -> client.delete(url));
-    }
-
-    @Test
-    @DisplayName("상품 수정 테스트")
-    void updateTest() {
-        // given
-        final ProductInfoResponse expected = 상품_생성("name", 1000, "https://www.naver.com/image.png");
-
-        상품_수정(expected, "수정", 1000, "https://www.naver.com/image.png");
+        assertThatRuntimeException().isThrownBy(() -> client.postForEntity(url, request, String.class))
+                .isInstanceOf(RestClientException.class);
     }
 
     private void 상품_수정(

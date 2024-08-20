@@ -24,17 +24,34 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
+
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     runtimeOnly("com.h2database:h2")
     runtimeOnly("com.mysql:mysql-connector-j")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    testImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
+
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly("com.h2database:h2")
     testRuntimeOnly("com.mysql:mysql-connector-j")
+
+    testImplementation("com.navercorp.fixturemonkey:fixture-monkey-starter:1.0.15")
+    implementation("com.github.curious-odd-man:rgxgen:2.0")
+
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.3")
+    }
 }
 
 kotlin {
