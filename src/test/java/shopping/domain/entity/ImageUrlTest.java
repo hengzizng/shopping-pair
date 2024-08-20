@@ -1,4 +1,4 @@
-package shopping.domain;
+package shopping.domain.entity;
 
 
 import org.junit.jupiter.api.DisplayName;

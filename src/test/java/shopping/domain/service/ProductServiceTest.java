@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import shopping.api.request.CreateProductRequest;
 import shopping.domain.entity.Product;
 
 import java.util.List;
@@ -19,23 +20,29 @@ public class ProductServiceTest {
     @Test
     @DisplayName("createProductTest")
     void createProductTest() {
-        Product product = new Product("책",5000,"https://image.png");
+        상품_생성("책",5000,"https://image.png");
+    }
 
+    private Product 상품_생성(
+            String name,
+            int price,
+            String imageUrl
+    ) {
+        CreateProductRequest product = new CreateProductRequest(name, price, imageUrl);
         Product savedProduct = productService.createProduct(product);
 
         assertThat(savedProduct.getId()).isNotNull();
-        assertThat(savedProduct.getName()).isEqualTo(product.getName());
-        assertThat(savedProduct.getPrice()).isEqualTo(product.getPrice());
-        assertThat(savedProduct.getImageUrl()).isEqualTo(product.getImageUrl());
+        assertThat(savedProduct.getName().getValue()).isEqualTo(product.getName());
+        assertThat(savedProduct.getPrice().getValue()).isEqualTo(product.getPrice());
+        assertThat(savedProduct.getImageUrl().getValue()).isEqualTo(product.getImageUrl());
 
+        return savedProduct;
     }
 
     @Test
     @DisplayName("updateProductTest")
     void updateProductTest() {
-        Product product = new Product(1L,"책",5000,"https://image.png");
-
-        Product savedProduct = productService.createProduct(product);
+        Product savedProduct = 상품_생성("책",5000,"https://image.png");
         Product updateProduct = new Product(savedProduct.getId(), "수정", 2000, "https://naver.png");
 
         Product actual = productService.updateProduct(updateProduct);
@@ -49,9 +56,7 @@ public class ProductServiceTest {
     @Test
     @DisplayName("deleteProductTest")
     void deleteProductTest() {
-        Product product = new Product(1L,"책",5000,"https://image.png");
-
-        Product savedProduct = productService.createProduct(product);
+        Product savedProduct = 상품_생성("책",5000,"https://image.png");
 
         assertThatNoException().isThrownBy(() -> productService.deleteProduct(savedProduct.getId()));
     }
@@ -59,9 +64,7 @@ public class ProductServiceTest {
     @Test
     @DisplayName("findAllTest")
     void findAllTest() {
-        Product product = new Product(1L,"책",5000,"https://image.png");
-
-        Product savedProduct = productService.createProduct(product);
+        Product savedProduct = 상품_생성("책",5000,"https://image.png");
 
         List<Product> actual = productService.findAll();
 
@@ -70,7 +73,5 @@ public class ProductServiceTest {
         assertThat(actual.get(0).getPrice()).isEqualTo(savedProduct.getPrice());
         assertThat(actual.get(0).getImageUrl()).isEqualTo(savedProduct.getImageUrl());
     }
-
-
 
 }

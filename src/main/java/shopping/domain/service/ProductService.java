@@ -2,6 +2,10 @@ package shopping.domain.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import shopping.api.request.CreateProductRequest;
+import shopping.domain.entity.ImageUrl;
+import shopping.domain.entity.Name;
+import shopping.domain.entity.Price;
 import shopping.domain.entity.Product;
 import shopping.domain.repository.ProductRepository;
 
@@ -13,8 +17,8 @@ public class ProductService {
     @Autowired
     ProductRepository productRepository;
 
-    public Product createProduct(Product product) {
-
+    public Product createProduct(CreateProductRequest createProductRequest) {
+        Product product = new Product(new Name(createProductRequest.getName()), new Price(createProductRequest.getPrice()), new ImageUrl(createProductRequest.getImageUrl()));
         return productRepository.save(product);
     }
 

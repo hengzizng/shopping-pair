@@ -1,6 +1,7 @@
 package shopping.api.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import shopping.domain.entity.Price;
 import shopping.domain.entity.Product;
 import shopping.domain.repository.ProductRepository;
 import shopping.domain.repository.ProductRepositoryImpl;
+import shopping.domain.service.ProductService;
 import shopping.util.IdGenerator;
 
 import java.util.List;
@@ -21,14 +23,14 @@ import java.util.TreeMap;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-    private final ProductRepository productRepository = new ProductRepositoryImpl();
+    @Autowired
+    private ProductService productService;
 
     @PostMapping("")
     public ResponseEntity<ProductInfoResponse> createProduct(
             @Valid @RequestBody CreateProductRequest createProductRequest
     ) {
-        Product product = new Product(new Name(createProductRequest.getName()), new Price(createProductRequest.getPrice()), new ImageUrl(createProductRequest.getImageUrl()));
-        Product savedProduct = productRepository.save(product);
+        Product savedProduct = productService.createProduct(createProductRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new ProductInfoResponse(
                 savedProduct.getId(),
@@ -41,7 +43,7 @@ public class ProductController {
 
     @GetMapping("")
     public ResponseEntity<List<ProductInfoResponse>> getProduct() {
-        final List<ProductInfoResponse> streamResponses = productRepository.findAll()
+        final List<ProductInfoResponse> streamResponses = productService.findAll()
                 .stream()
                 .map(product -> new ProductInfoResponse(
                         product.getId(),
@@ -58,12 +60,8 @@ public class ProductController {
             @PathVariable long productId,
             @Valid @RequestBody CreateProductRequest createProductRequest
     ) {
-        if(productRepository.findById(productId).isEmpty()) {
-            throw new IllegalArgumentException("해당 상품은 없습니다.");
-        }
-
-        Product product = new Product(new Name(createProductRequest.getName()), new Price(createProductRequest.getPrice()), new ImageUrl(createProductRequest.getImageUrl()));
-        Product savedProduct = productRepository.save(product);
+        Product product = new Product(productId, createProductRequest.getName(), createProductRequest.getPrice(), createProductRequest.getImageUrl());
+        Product savedProduct = productService.updateProduct(product);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new ProductInfoResponse(
                 productId,
@@ -77,10 +75,6 @@ public class ProductController {
     public void deleteProduct(
             @PathVariable long productId
     ) {
-        if(productRepository.findById(productId).isEmpty()) {
-            throw new IllegalArgumentException("해당 상품은 없습니다.");
-        }
-
-        productRepository.removeById(productId);
+        productService.deleteProduct(productId);
     }
 }
