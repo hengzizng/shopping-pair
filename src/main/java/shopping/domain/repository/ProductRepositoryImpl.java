@@ -1,5 +1,6 @@
 package shopping.domain.repository;
 
+import org.springframework.stereotype.Repository;
 import shopping.domain.entity.Product;
 
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Repository
 public class ProductRepositoryImpl implements ProductRepository {
     private final TreeMap<Long, Product> dataBase = new TreeMap<>();
     private final AtomicLong id = new AtomicLong(0L);

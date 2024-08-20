@@ -25,6 +25,13 @@ public class Product {
         this.imageUrl = product.imageUrl;
     }
 
+    public Product(long id, String name, int price, String imageUrl) {
+        this.id = id;
+        this.name = new Name(name);
+        this.price = new Price(price);
+        this.imageUrl = new ImageUrl(imageUrl);
+    }
+
     public Long getId() {
         return id;
     }
