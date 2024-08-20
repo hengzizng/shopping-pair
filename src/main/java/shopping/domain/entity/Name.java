@@ -3,6 +3,8 @@ package shopping.domain.entity;
 import java.util.Objects;
 
 public class Name {
+    public static final String regex = "^[\\p{L}\\p{N}\\s\\(\\)\\[\\]\\+\\-\\&\\/_]{1,15}";
+
     private String value;
 
     protected Name() {
