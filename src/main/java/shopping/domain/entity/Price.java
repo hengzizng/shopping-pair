@@ -1,4 +1,4 @@
-package shopping.domain;
+package shopping.domain.entity;
 
 public class Price {
     private int value;

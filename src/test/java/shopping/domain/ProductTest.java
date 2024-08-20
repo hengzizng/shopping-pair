@@ -2,6 +2,10 @@ package shopping.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import shopping.domain.entity.ImageUrl;
+import shopping.domain.entity.Name;
+import shopping.domain.entity.Price;
+import shopping.domain.entity.Product;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 

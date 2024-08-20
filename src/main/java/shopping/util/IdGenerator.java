@@ -1,9 +1,6 @@
 package shopping.util;
 
-import shopping.domain.Product;
-
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.TreeMap;
 
 public class IdGenerator {

@@ -1,4 +1,4 @@
-package shopping.domain;
+package shopping.domain.entity;
 
 public class Name {
     private String value;

@@ -6,13 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shopping.api.request.CreateProductRequest;
 import shopping.api.response.ProductInfoResponse;
-import shopping.domain.ImageUrl;
-import shopping.domain.Name;
-import shopping.domain.Price;
-import shopping.domain.Product;
+import shopping.domain.entity.ImageUrl;
+import shopping.domain.entity.Name;
+import shopping.domain.entity.Price;
+import shopping.domain.entity.Product;
+import shopping.domain.repository.ProductRepository;
+import shopping.domain.repository.ProductRepositoryImpl;
 import shopping.util.IdGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -20,35 +21,33 @@ import java.util.TreeMap;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-
-    private final TreeMap<Long, Product> dataBase = new TreeMap<>();
+    private final ProductRepository productRepository = new ProductRepositoryImpl();
 
     @PostMapping("")
     public ResponseEntity<ProductInfoResponse> createProduct(
             @Valid @RequestBody CreateProductRequest createProductRequest
     ) {
         Product product = new Product(new Name(createProductRequest.getName()), new Price(createProductRequest.getPrice()), new ImageUrl(createProductRequest.getImageUrl()));
-        Long id = IdGenerator.getNextId(dataBase);
-        dataBase.put(id, product);
+        Product savedProduct = productRepository.save(product);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new ProductInfoResponse(
-                id,
-                product.getName().getValue(),
-                product.getPrice().getValue(),
-                product.getImageUrl().getValue()
+                savedProduct.getId(),
+                savedProduct.getName().getValue(),
+                savedProduct.getPrice().getValue(),
+                savedProduct.getImageUrl().getValue()
         ));
     }
 
 
     @GetMapping("")
     public ResponseEntity<List<ProductInfoResponse>> getProduct() {
-        final List<ProductInfoResponse> streamResponses = dataBase.entrySet()
+        final List<ProductInfoResponse> streamResponses = productRepository.findAll()
                 .stream()
-                .map(mapEntry -> new ProductInfoResponse(
-                        mapEntry.getKey(),
-                        mapEntry.getValue().getName().getValue(),
-                        mapEntry.getValue().getPrice().getValue(),
-                        mapEntry.getValue().getImageUrl().getValue()
+                .map(product -> new ProductInfoResponse(
+                        product.getId(),
+                        product.getName().getValue(),
+                        product.getPrice().getValue(),
+                        product.getImageUrl().getValue()
                 )).toList();
 
         return ResponseEntity.status(HttpStatus.OK).body(streamResponses);
@@ -59,18 +58,18 @@ public class ProductController {
             @PathVariable long productId,
             @Valid @RequestBody CreateProductRequest createProductRequest
     ) {
-        if(Optional.ofNullable(dataBase.get(productId)).isEmpty()) {
+        if(productRepository.findById(productId).isEmpty()) {
             throw new IllegalArgumentException("해당 상품은 없습니다.");
         }
 
         Product product = new Product(new Name(createProductRequest.getName()), new Price(createProductRequest.getPrice()), new ImageUrl(createProductRequest.getImageUrl()));
-        dataBase.put(productId, product);
+        Product savedProduct = productRepository.save(product);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(new ProductInfoResponse(
                 productId,
-                product.getName().getValue(),
-                product.getPrice().getValue(),
-                product.getImageUrl().getValue()
+                savedProduct.getName().getValue(),
+                savedProduct.getPrice().getValue(),
+                savedProduct.getImageUrl().getValue()
         ));
     }
 
@@ -78,11 +77,10 @@ public class ProductController {
     public void deleteProduct(
             @PathVariable long productId
     ) {
-        if(Optional.ofNullable(dataBase.get(productId)).isEmpty()) {
+        if(productRepository.findById(productId).isEmpty()) {
             throw new IllegalArgumentException("해당 상품은 없습니다.");
         }
 
-        dataBase.remove(productId);
+        productRepository.removeById(productId);
     }
-
 }

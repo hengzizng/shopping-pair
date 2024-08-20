@@ -1,4 +1,4 @@
-package shopping.domain;
+package shopping.domain.entity;
 
 import java.util.regex.Pattern;
 

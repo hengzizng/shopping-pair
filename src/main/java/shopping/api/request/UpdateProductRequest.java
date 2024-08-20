@@ -1,7 +1,7 @@
 package shopping.api.request;
 
 import jakarta.validation.constraints.Pattern;
-import shopping.domain.ImageUrl;
+import shopping.domain.entity.ImageUrl;
 
 public class UpdateProductRequest {
     private Long id;
