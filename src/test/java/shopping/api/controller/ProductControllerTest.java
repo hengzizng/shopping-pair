@@ -20,6 +20,7 @@ import shopping.api.response.ProductInfoResponse;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductControllerTest {
@@ -50,6 +51,15 @@ public class ProductControllerTest {
         final ProductInfoResponse expected = 상품_생성("name", 1000, "https://www.naver.com/image.png");
 
         상품_조회(expected);
+    }
+
+    @Test
+    @DisplayName("상품 삭제 테스트")
+    void deleteTest() {
+        final ProductInfoResponse actual = 상품_생성("name", 1000, "https://www.naver.com/image.png");
+
+        final String url = "http://localhost:" + port + "/api/products/" + actual.getId();
+        assertThatNoException().isThrownBy(() -> client.delete(url));
     }
 
     @Test

@@ -74,4 +74,15 @@ public class ProductController {
         ));
     }
 
+    @DeleteMapping("/{productId}")
+    public void deleteProduct(
+            @PathVariable long productId
+    ) {
+        if(Optional.ofNullable(dataBase.get(productId)).isEmpty()) {
+            throw new IllegalArgumentException("해당 상품은 없습니다.");
+        }
+
+        dataBase.remove(productId);
+    }
+
 }
